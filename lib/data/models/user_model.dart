@@ -86,4 +86,52 @@ class UserModel {
         },
         createdAt: DateTime.now().subtract(const Duration(days: 30)),
       );
+
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      uid: json['uid'] as String,
+      name: json['name'] as String? ?? 'User',
+      email: json['email'] as String? ?? '',
+      photoUrl: json['photoUrl'] as String?,
+      planType: PlanType.values.firstWhere(
+        (e) => e.name == (json['planType'] as String?),
+        orElse: () => PlanType.free,
+      ),
+      streakCount: json['streakCount'] as int? ?? 1,
+      lastOpenDate: json['lastOpenDate'] != null
+          ? DateTime.tryParse(json['lastOpenDate'].toString())
+          : null,
+      enrolledCourses: (json['enrolledCourses'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
+      courseProgress: (json['courseProgress'] as Map<String, dynamic>?)?.map(
+            (k, v) => MapEntry(k, v as int),
+          ) ??
+          {},
+      completedLessons: (json['completedLessons'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toSet() ??
+          {},
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'uid': uid,
+      'name': name,
+      'email': email,
+      'photoUrl': photoUrl,
+      'planType': planType.name,
+      'streakCount': streakCount,
+      'lastOpenDate': lastOpenDate?.toIso8601String(),
+      'enrolledCourses': enrolledCourses,
+      'courseProgress': courseProgress,
+      'completedLessons': completedLessons.toList(),
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
 }

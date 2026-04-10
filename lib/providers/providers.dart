@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../data/models/user_model.dart';
 import '../data/models/post_model.dart';
 import '../data/repositories/preferences_repository.dart';
@@ -42,35 +47,61 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final PreferencesRepository _prefs;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  AuthNotifier(this._prefs) : super(const AuthState());
+  AuthNotifier(this._prefs) : super(const AuthState()) {
+    _auth.authStateChanges().listen((User? user) async {
+      try {
+        final onboardingDone = await _prefs.isOnboardingComplete();
+        if (user != null) {
+          await _prefs.setUserName(user.displayName ?? 'User');
+          await _prefs.setUserEmail(user.email ?? '');
+          await _prefs.setLoggedIn(true);
+          state = state.copyWith(
+            status: AuthStatus.authenticated,
+            onboardingComplete: onboardingDone,
+          );
+        } else {
+          await _prefs.setLoggedIn(false);
+          state = state.copyWith(
+            status: AuthStatus.unauthenticated,
+            onboardingComplete: onboardingDone,
+          );
+        }
+      } catch (e) {
+        debugPrint('Auth listener error: $e');
+      }
+    });
+  }
 
   Future<void> checkAuthStatus() async {
     try {
-      final isLoggedIn = await _prefs.isLoggedIn();
       final onboardingDone = await _prefs.isOnboardingComplete();
-      state = state.copyWith(
-        status:
-            isLoggedIn ? AuthStatus.authenticated : AuthStatus.unauthenticated,
-        onboardingComplete: onboardingDone,
-      );
+      state = state.copyWith(onboardingComplete: onboardingDone);
     } catch (e) {
-      state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        error: e.toString(),
-      );
+      state = state.copyWith(error: e.toString());
     }
   }
 
-  Future<void> signIn(String name, String email) async {
+  Future<void> signInWithGoogle() async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      await _prefs.setLoggedIn(true);
-      await _prefs.setUserName(name);
-      await _prefs.setUserEmail(email);
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        state = state.copyWith(isLoading: false);
+        return;
+      }
+      
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      
+      await _auth.signInWithCredential(credential);
       await _prefs.setOnboardingComplete();
       state = state.copyWith(
-        status: AuthStatus.authenticated,
         isLoading: false,
         onboardingComplete: true,
       );
@@ -88,8 +119,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> signOut() async {
-    await _prefs.clearAll();
-    state = const AuthState(status: AuthStatus.unauthenticated);
+    try {
+      await _auth.signOut();
+      await _googleSignIn.signOut();
+      await _prefs.setLoggedIn(false);
+      state = const AuthState(status: AuthStatus.unauthenticated);
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
   }
 }
 
@@ -100,59 +137,95 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
 
 // ─── User State ──────────────────────────────────────────
 class UserNotifier extends StateNotifier<UserModel> {
-  final PreferencesRepository _prefs;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  StreamSubscription? _userSub;
 
-  UserNotifier(this._prefs) : super(UserModel.demo);
+  UserNotifier() : super(UserModel.demo) {
+    FirebaseAuth.instance.authStateChanges().listen((fbUser) {
+      _userSub?.cancel();
+      if (fbUser != null) {
+        _userSub = _firestore
+            .collection('users')
+            .doc(fbUser.uid)
+            .snapshots()
+            .listen((snapshot) {
+          if (snapshot.exists && snapshot.data() != null) {
+            state = UserModel.fromJson(snapshot.data()!);
+          } else {
+            // Create user profile on first sign-in
+            final newUser = UserModel(
+              uid: fbUser.uid,
+              name: fbUser.displayName ?? 'User',
+              email: fbUser.email ?? '',
+              photoUrl: fbUser.photoURL,
+              createdAt: DateTime.now(),
+            );
+            _firestore.collection('users').doc(fbUser.uid).set(newUser.toJson());
+          }
+        });
+      } else {
+        state = UserModel.demo;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _userSub?.cancel();
+    super.dispose();
+  }
 
   Future<void> loadUser() async {
-    try {
-      final name = await _prefs.getUserName();
-      final email = await _prefs.getUserEmail();
-      final streak = await _prefs.getStreakCount();
-      final planStr = await _prefs.getPlanType();
-      final plan = PlanType.values.firstWhere(
-        (e) => e.name == planStr,
-        orElse: () => PlanType.free,
-      );
-
-      state = state.copyWith(
-        name: name,
-        email: email,
-        streakCount: streak,
-        planType: plan,
-      );
-    } catch (e) {
-      // Keep demo state on error
-    }
+    // Keep for backward compatibility, data relies on stream now.
   }
 
   void updatePlan(PlanType plan) {
-    state = state.copyWith(planType: plan);
-    _prefs.setPlanType(plan.name);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _firestore.collection('users').doc(uid).update({'planType': plan.name});
+    } else {
+      state = state.copyWith(planType: plan);
+    }
   }
 
   void enrollCourse(String courseId) {
-    if (!state.enrolledCourses.contains(courseId)) {
-      final enrolled = List<String>.from(state.enrolledCourses)..add(courseId);
-      final progress = Map<String, int>.from(state.courseProgress);
-      progress[courseId] = 0;
-      state = state.copyWith(
-        enrolledCourses: enrolled,
-        courseProgress: progress,
-      );
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      _firestore.collection('users').doc(uid).update({
+        'enrolledCourses': FieldValue.arrayUnion([courseId]),
+        'courseProgress.$courseId': 0,
+      });
+    } else {
+      if (!state.enrolledCourses.contains(courseId)) {
+        final enrolled = List<String>.from(state.enrolledCourses)..add(courseId);
+        final progress = Map<String, int>.from(state.courseProgress);
+        progress[courseId] = 0;
+        state = state.copyWith(
+          enrolledCourses: enrolled,
+          courseProgress: progress,
+        );
+      }
     }
   }
 
   void completeLesson(String courseId, int lessonIndex) {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     final lessonKey = '${courseId}_$lessonIndex';
-    if (!state.completedLessons.contains(lessonKey)) {
-      final completed = Set<String>.from(state.completedLessons)..add(lessonKey);
-      final progress = Map<String, int>.from(state.courseProgress);
-      progress[courseId] = (progress[courseId] ?? 0) + 1;
-      state = state.copyWith(
-        completedLessons: completed,
-        courseProgress: progress,
-      );
+    if (uid != null) {
+      _firestore.collection('users').doc(uid).update({
+        'completedLessons': FieldValue.arrayUnion([lessonKey]),
+        'courseProgress.$courseId': FieldValue.increment(1),
+      });
+    } else {
+      if (!state.completedLessons.contains(lessonKey)) {
+        final completed = Set<String>.from(state.completedLessons)..add(lessonKey);
+        final progress = Map<String, int>.from(state.courseProgress);
+        progress[courseId] = (progress[courseId] ?? 0) + 1;
+        state = state.copyWith(
+          completedLessons: completed,
+          courseProgress: progress,
+        );
+      }
     }
   }
 
@@ -166,59 +239,61 @@ class UserNotifier extends StateNotifier<UserModel> {
 }
 
 final userProvider = StateNotifierProvider<UserNotifier, UserModel>((ref) {
-  final prefs = ref.read(preferencesRepositoryProvider);
-  return UserNotifier(prefs);
+  return UserNotifier();
 });
 
 // ─── Streak ──────────────────────────────────────────
 class StreakNotifier extends StateNotifier<int> {
-  final PreferencesRepository _prefs;
-
-  StreakNotifier(this._prefs) : super(1);
+  StreakNotifier() : super(1);
 
   Future<void> checkAndUpdateStreak() async {
     try {
-      final lastDateStr = await _prefs.getLastOpenDate();
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      
+      final docRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+      final doc = await docRef.get();
+      if (!doc.exists) return;
+      
+      final data = doc.data()!;
+      final lastDateStr = data['lastOpenDate'] as String?;
+      final streakCount = data['streakCount'] as int? ?? 1;
+      
       final today = DateTime.now();
-      final todayStr =
-          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-
-      if (lastDateStr == null) {
-        // First time
-        await _prefs.setLastOpenDate(todayStr);
-        await _prefs.setStreakCount(1);
+      final todayStr = today.toIso8601String().substring(0, 10);
+      final lastDateOnly = lastDateStr != null && lastDateStr.length >= 10 
+          ? lastDateStr.substring(0, 10) 
+          : null;
+      
+      if (lastDateOnly == null) {
+        await docRef.update({'lastOpenDate': today.toIso8601String(), 'streakCount': 1});
         state = 1;
         return;
       }
-
-      if (lastDateStr == todayStr) {
-        // Same day, no change
-        state = await _prefs.getStreakCount();
+      
+      if (lastDateOnly == todayStr) {
+        state = streakCount;
         return;
       }
-
-      final lastDate = DateTime.parse(lastDateStr);
+      
+      final lastDate = DateTime.parse(lastDateOnly);
       if (AppDateUtils.isConsecutiveDay(lastDate, today)) {
-        // Consecutive day — increment streak
-        final newStreak = (await _prefs.getStreakCount()) + 1;
-        await _prefs.setStreakCount(newStreak);
-        await _prefs.setLastOpenDate(todayStr);
+        final newStreak = streakCount + 1;
+        await docRef.update({'lastOpenDate': today.toIso8601String(), 'streakCount': newStreak});
         state = newStreak;
       } else {
-        // Missed a day — reset to 1
-        await _prefs.setStreakCount(1);
-        await _prefs.setLastOpenDate(todayStr);
+        await docRef.update({'lastOpenDate': today.toIso8601String(), 'streakCount': 1});
         state = 1;
       }
     } catch (e) {
+      debugPrint('Streak update error: $e');
       state = 1;
     }
   }
 }
 
 final streakProvider = StateNotifierProvider<StreakNotifier, int>((ref) {
-  final prefs = ref.read(preferencesRepositoryProvider);
-  return StreakNotifier(prefs);
+  return StreakNotifier();
 });
 
 // ─── Community (Likes) ──────────────────────────────────────────

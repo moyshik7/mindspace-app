@@ -146,7 +146,7 @@ class _MehrinScreenState extends State<MehrinScreen>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Text(
-                'Your AI mental health companion. Powered by a 100B parameter model. Available in the next update.',
+                'Your AI mental health companion. Available in the next update.',
                 style: AppTypography.body.copyWith(
                   color: AppColors.textSecondary,
                   height: 1.6,

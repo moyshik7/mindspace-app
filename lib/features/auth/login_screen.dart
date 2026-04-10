@@ -48,15 +48,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
   Future<void> _signInWithGoogle() async {
     if (kIsWeb) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Web version is for debugging only')),
+        const SnackBar(content: Text('Firebase Google Sign-In requires configuration for Web. Ensure flutterfire configure is run.')),
       );
     }
-    // Simulated sign-in for demo
-    await ref.read(authProvider.notifier).signIn('Sayuri', 'sayuri@mindspace.app');
+    
+    await ref.read(authProvider.notifier).signInWithGoogle();
+    
     if (mounted) {
-      ref.read(userProvider.notifier).loadUser();
-      ref.read(streakProvider.notifier).checkAndUpdateStreak();
-      context.go('/home');
+      final authState = ref.read(authProvider);
+      if (authState.error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(authState.error!),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      } else if (authState.status == AuthStatus.authenticated) {
+        ref.read(userProvider.notifier).loadUser();
+        ref.read(streakProvider.notifier).checkAndUpdateStreak();
+        context.go('/home');
+      }
     }
   }
 
