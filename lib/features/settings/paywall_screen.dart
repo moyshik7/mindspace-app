@@ -43,11 +43,12 @@ class PaywallScreen extends ConsumerWidget {
             const SizedBox(height: 24),
 
             // Plan cards
-            _buildPlanCard(
+            if (user.planType.index <= PlanType.free.index) ...[
+              _buildPlanCard(
               context,
               ref,
               title: 'Free',
-              price: '\$0',
+              price: '0 BDT',
               period: '/forever',
               features: [
                 _Feature('3 course lessons', true),
@@ -62,12 +63,14 @@ class PaywallScreen extends ConsumerWidget {
               accentColor: AppColors.textSecondary,
             ),
             const SizedBox(height: 14),
+            ],
 
-            _buildPlanCard(
+            if (user.planType.index <= PlanType.pro.index) ...[
+              _buildPlanCard(
               context,
               ref,
               title: 'Pro ⭐',
-              price: '\$4.99',
+              price: '399 BDT',
               period: '/month',
               features: [
                 _Feature('Unlimited course access', true),
@@ -83,12 +86,13 @@ class PaywallScreen extends ConsumerWidget {
               isPopular: true,
             ),
             const SizedBox(height: 14),
+            ],
 
             _buildPlanCard(
               context,
               ref,
               title: 'Ultra 💎',
-              price: '\$9.99',
+              price: '799 BDT',
               period: '/month',
               features: [
                 _Feature('Everything in Pro', true),
@@ -195,7 +199,7 @@ class PaywallScreen extends ConsumerWidget {
               Text(
                 price,
                 style: AppTypography.headingXL.copyWith(
-                  fontSize: 32,
+                  fontSize: 24, // Reduced font size to accommodate BDT text
                   color: accentColor,
                 ),
               ),
