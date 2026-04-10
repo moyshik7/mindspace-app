@@ -26,13 +26,13 @@ class ConsultationHeader extends StatelessWidget {
                   children: [
                     Text(
                       'Good Evening!',
-                      style: AppTypography.bodySmall.copyWith(color: Colors.white70),
+                      style: AppTypography.caption.copyWith(color: Colors.white70),
                     ),
                     Row(
                       children: [
                         Text(
                           userName,
-                          style: AppTypography.headingMedium.copyWith(color: Colors.white),
+                          style: AppTypography.headingM.copyWith(color: Colors.white),
                         ),
                         const SizedBox(width: 8),
                         const Text('👋', style: TextStyle(fontSize: 20)),
@@ -57,7 +57,7 @@ class ConsultationHeader extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(
                   'Online Consultation',
-                  style: AppTypography.headingSmall.copyWith(color: Colors.white),
+                  style: AppTypography.headingM.copyWith(color: Colors.white),
                 ),
               ],
             ),
@@ -83,7 +83,7 @@ class ConsultationHeader extends StatelessWidget {
                             Text(
                               'Feeling low?\nLet\'s talk!',
                               textAlign: TextAlign.center,
-                              style: AppTypography.headingSmall.copyWith(color: Colors.black87),
+                              style: AppTypography.bodyMedium.copyWith(color: Colors.black87),
                             ),
                             const SizedBox(height: 4),
                             Text(

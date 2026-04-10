@@ -19,7 +19,7 @@ class TalkWithMehrinCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'Talk with Mehrin',
-                style: AppTypography.headingSmall.copyWith(color: AppColors.textPrimary),
+                style: AppTypography.bodyMedium.copyWith(color: AppColors.textPrimary),
               ),
             ],
           ),
@@ -46,12 +46,12 @@ class TalkWithMehrinCard extends StatelessWidget {
                       children: [
                         Text(
                           'Need to talk?',
-                          style: AppTypography.headingMedium.copyWith(color: Colors.black87),
+                          style: AppTypography.headingM.copyWith(color: Colors.black87),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           "Mehrin's listening",
-                          style: AppTypography.bodySmall.copyWith(
+                          style: AppTypography.caption.copyWith(
                             color: Colors.black54, 
                             fontStyle: FontStyle.italic
                           ),

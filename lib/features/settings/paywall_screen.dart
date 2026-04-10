@@ -5,6 +5,8 @@ import '../../core/theme/app_typography.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/providers.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaywallScreen extends ConsumerWidget {
   const PaywallScreen({super.key});
@@ -239,16 +241,15 @@ class PaywallScreen extends ConsumerWidget {
               colors: planType == PlanType.free
                   ? [AppColors.surfaceElevated, AppColors.surfaceElevated]
                   : null,
-              onTap: () {
+              onTap: planType == PlanType.free ? () {
                 ref.read(userProvider.notifier).updatePlan(planType);
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        Text('Switched to ${planType.name.toUpperCase()} plan (demo)'),
+                  const SnackBar(
+                    content: Text('Switched to FREE plan (demo)'),
                   ),
                 );
-              },
+              } : () => _showPaymentSheet(context, title, price),
             )
           else
             Container(
@@ -269,6 +270,120 @@ class PaywallScreen extends ConsumerWidget {
             ),
         ],
       ),
+    );
+  }
+
+  void _showPaymentSheet(BuildContext context, String planTitle, String price) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surfaceElevated,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Complete your payment',
+                style: AppTypography.headingM,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'For $planTitle ($price)',
+                style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              // Google Pay
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Coming soon')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.payment),
+                label: const Text('Pay with Google Pay', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 12),
+              // Apple Pay
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Coming soon')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: Colors.white24),
+                  ),
+                ),
+                icon: const Icon(Icons.apple),
+                label: const Text('Pay with Apple Pay', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 24),
+              const Divider(color: AppColors.surfaceBorder),
+              const SizedBox(height: 16),
+              // Pay Manually
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final message = '[Subscribe] Mindspace: $planTitle Plan [$price]';
+                  final url = Uri.parse('https://wa.me/+8801805527311?text=${Uri.encodeComponent(message)}');
+                  try {
+                    await launchUrl(url, mode: LaunchMode.externalApplication);
+                  } catch (e) {
+                    debugPrint('Could not launch WhatsApp: $e');
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Pay Manually', style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 16),
+              // bKash & Nagad Logos
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/logo/bkash.svg',
+                    height: 30,
+                    errorBuilder: (c, e, s) => const Icon(Icons.account_balance_wallet, color: Colors.pink, size: 30),
+                  ),
+                  const SizedBox(width: 20),
+                  Image.asset(
+                    'assets/images/logo/nagad.png',
+                    height: 30,
+                    errorBuilder: (c, e, s) => const Icon(Icons.payments, color: Colors.orange, size: 30),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
     );
   }
 }

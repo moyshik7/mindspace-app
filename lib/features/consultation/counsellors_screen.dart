@@ -1,142 +1,183 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
-import '../../data/dummy_counsellors.dart';
 import '../../data/models/counsellor_model.dart';
-import 'package:go_router/go_router.dart';
+import 'providers/counsellors_provider.dart';
 
-class CounsellorsScreen extends StatelessWidget {
+class CounsellorsScreen extends ConsumerWidget {
   const CounsellorsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final counsellors = DummyCounsellors.all;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counsellorsAsync = ref.watch(counsellorsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.black, // Dark background matching the image
       appBar: AppBar(
-        title: Text('Expert Counsellors', style: AppTypography.headingMedium),
-        backgroundColor: AppColors.background,
+        title: const Text('Experts', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+        backgroundColor: Colors.black,
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1F1F24),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 16),
+          ),
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        itemCount: counsellors.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 16),
-        itemBuilder: (context, index) {
-          final counsellor = counsellors[index];
-          return _CounsellorCard(counsellor: counsellor);
-        },
+      body: counsellorsAsync.when(
+        data: (counsellors) => CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF07CDAB).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF07CDAB).withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFF07CDAB)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Your first counseling session. Professional mental health support starting from 800 Taka',
+                          style: AppTypography.caption.copyWith(color: AppColors.textPrimary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverGrid(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.76,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final counsellor = counsellors[index];
+                    return _GridCounsellorCard(counsellor: counsellor);
+                  },
+                  childCount: counsellors.length,
+                ),
+              ),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          ],
+        ),
+        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF07CDAB))),
+        error: (err, stack) => const Center(child: Text('Error loading experts', style: TextStyle(color: Colors.white))),
       ),
     );
   }
 }
 
-class _CounsellorCard extends StatelessWidget {
+class _GridCounsellorCard extends StatelessWidget {
   final CounsellorModel counsellor;
 
-  const _CounsellorCard({required this.counsellor});
+  const _GridCounsellorCard({required this.counsellor});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.surfaceBorder),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  counsellor.image,
-                  width: 72,
-                  height: 72,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 72,
-                    height: 72,
-                    color: AppColors.surfaceBorder,
-                    child: const Icon(Icons.person, color: AppColors.textMuted),
+    return GestureDetector(
+      onTap: () => context.push('/home/counsellors/${counsellor.id}', extra: counsellor),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1C1D), // Dark brownish-grey card equivalent
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.fromLTRB(10, 20, 10, 16),
+        child: Column(
+          children: [
+            // Image with Yellow circle background
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.bottomCenter,
+              children: [
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFFFF08B), // Pale Yellow
+                    shape: BoxShape.circle,
+                  ),
+                  child: ClipOval(
+                    child: Image.network(
+                      counsellor.image,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, color: Colors.black12, size: 60),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      counsellor.name,
-                      style: AppTypography.headingSmall,
+                Positioned(
+                  bottom: -10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF32282C),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      counsellor.title,
-                      style: AppTypography.caption.copyWith(color: AppColors.primary),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Icon(Icons.work_history_rounded, size: 14, color: AppColors.textMuted),
-                        const SizedBox(width: 6),
-                        Text(
-                          counsellor.experience,
-                          style: AppTypography.caption.copyWith(color: AppColors.textMuted),
-                        ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Text('5.0', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        SizedBox(width: 4),
+                        Icon(Icons.star, color: Color(0xFFFFB300), size: 10),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            counsellor.specialization,
-            style: AppTypography.bodySmall,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.schedule_rounded, size: 16, color: AppColors.textMuted),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  counsellor.availability,
-                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-              child: const Text('Book Appointment', style: TextStyle(fontWeight: FontWeight.w600)),
+              ],
             ),
-          )
-        ],
+            const Spacer(),
+            Text(
+              counsellor.name,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              counsellor.title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
+            const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF07CDAB),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 16),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

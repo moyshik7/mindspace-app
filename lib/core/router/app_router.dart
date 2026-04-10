@@ -11,8 +11,10 @@ import '../../features/community/community_screen.dart';
 import '../../features/community/write_post_screen.dart';
 import '../../features/mehrin/mehrin_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/consultation/screens/counsellor_detail_screen.dart';
 import '../../features/settings/paywall_screen.dart';
 import '../../features/consultation/counsellors_screen.dart';
+import '../../data/models/counsellor_model.dart';
 import '../../shell/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -128,6 +130,19 @@ final GoRouter appRouter = GoRouter(
                 key: state.pageKey,
                 child: const CounsellorsScreen(),
               ),
+              routes: [
+                GoRoute(
+                  path: ':id',
+                  parentNavigatorKey: _rootNavigatorKey,
+                  pageBuilder: (context, state) {
+                    final counsellor = state.extra as CounsellorModel;
+                    return _SlideTransitionPage(
+                      key: state.pageKey,
+                      child: CounsellorDetailScreen(counsellor: counsellor),
+                    );
+                  },
+                ),
+              ],
             ),
             GoRoute(
               path: 'guide/:id',
