@@ -5,7 +5,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/staggered_fade_slide.dart';
 import '../../data/dummy_data.dart';
 import '../../providers/providers.dart';
-import 'widgets/greeting_header.dart';
+import 'widgets/consultation_header.dart';
+import 'widgets/talk_with_mehrin_card.dart';
 import 'widgets/streak_card.dart';
 import 'widgets/plan_banner.dart';
 import 'widgets/daily_tip_card.dart';
@@ -46,17 +47,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 12),
-
-                  // Greeting
+                  // Wavy Consultation Header
                   StaggeredFadeSlide(
                     index: 0,
-                    child: GreetingHeader(
+                    child: ConsultationHeader(
                       userName: user.name,
                       onAvatarTap: () => context.go('/settings'),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  
+                  // Talk with Mehrin Card
+                  const StaggeredFadeSlide(
+                    index: 1,
+                    child: TalkWithMehrinCard(),
+                  ),
+                  const SizedBox(height: 24),
 
                   // Streak Card
                   StaggeredFadeSlide(

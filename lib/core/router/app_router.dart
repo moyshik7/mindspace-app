@@ -12,6 +12,7 @@ import '../../features/community/write_post_screen.dart';
 import '../../features/mehrin/mehrin_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/settings/paywall_screen.dart';
+import '../../features/consultation/counsellors_screen.dart';
 import '../../shell/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -120,6 +121,14 @@ final GoRouter appRouter = GoRouter(
             child: const HomeScreen(),
           ),
           routes: [
+            GoRoute(
+              path: 'counsellors',
+              parentNavigatorKey: _rootNavigatorKey,
+              pageBuilder: (context, state) => _SlideTransitionPage(
+                key: state.pageKey,
+                child: const CounsellorsScreen(),
+              ),
+            ),
             GoRoute(
               path: 'guide/:id',
               parentNavigatorKey: _rootNavigatorKey,

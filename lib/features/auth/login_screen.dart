@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/widgets/animated_button.dart';
 import '../../providers/providers.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -99,7 +100,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                     width: 80,
                     height: 80,
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
                       borderRadius: BorderRadius.circular(22),
                       boxShadow: [
                         BoxShadow(
@@ -109,11 +109,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                       ],
                     ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.psychology_rounded,
-                        size: 42,
-                        color: Colors.white,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(22),
+                      child: Image.asset(
+                        'assets/images/logo-white-bg.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -189,23 +191,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               ),
                             )
                           else ...[
-                            Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Center(
-                                child: Text(
-                                  'G',
-                                  style: TextStyle(
-                                    color: Color(0xFF4285F4),
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
+                            SvgPicture.asset(
+                              'assets/images/logo/google.svg',
+                              width: 24,
+                              height: 24,
                             ),
                             const SizedBox(width: 12),
                             Text(
@@ -233,8 +222,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.apple_rounded,
-                              color: AppColors.textMuted, size: 22),
+                          SvgPicture.asset(
+                            'assets/images/logo/apple.svg',
+                            width: 24,
+                            height: 24,
+                            colorFilter: const ColorFilter.mode(
+                              AppColors.textMuted, 
+                              BlendMode.srcIn,
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             'Continue with Apple',
@@ -262,8 +258,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.window_rounded,
-                              color: AppColors.textMuted, size: 20),
+                          SvgPicture.asset(
+                            'assets/images/logo/microsoft.svg',
+                            width: 24,
+                            height: 24,
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             'Continue with Microsoft',

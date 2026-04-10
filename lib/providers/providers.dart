@@ -104,6 +104,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(
         isLoading: false,
         onboardingComplete: true,
+        status: AuthStatus.authenticated,
       );
     } catch (e) {
       state = state.copyWith(

@@ -12,6 +12,7 @@ dependencies:
 
   # State Management
   flutter_riverpod: ^2.6.1
+  flutter_svg: ^2.0.10
 
   # Navigation
   go_router: ^14.8.1
@@ -47,3 +48,4 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/logo/
