@@ -16,24 +16,25 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    
+    // Init notifications
+    await NotificationService().init();
+
+    // Set immersive system UI
+    AppTheme.setSystemUI();
+
+    // Lock orientation to portrait
+    await SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   } catch (e) {
-    debugPrint('Firebase init failed (expected if flutterfire configure was not run): $e');
+    debugPrint('Initialization error: $e');
+  } finally {
+    // Small delay to ensure everything is ready for the first frame
+    await Future.delayed(const Duration(milliseconds: 500));
+    FlutterNativeSplash.remove();
   }
-
-  // Set immersive system UI
-  AppTheme.setSystemUI();
-
-  // Init notifications
-  await NotificationService().init();
-
-  // Lock orientation to portrait
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
-
-  // Remove splash screen
-  FlutterNativeSplash.remove();
 
   runApp(
     const ProviderScope(
