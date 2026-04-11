@@ -83,6 +83,22 @@ class PreferencesRepository {
     await p.setBool(AppConstants.keyNotificationsEnabled, value);
   }
 
+  Future<int> getReminderHour() async {
+    final p = await prefs;
+    return p.getInt(AppConstants.keyReminderHour) ?? 18; // Default 6 PM
+  }
+
+  Future<int> getReminderMinute() async {
+    final p = await prefs;
+    return p.getInt(AppConstants.keyReminderMinute) ?? 0;
+  }
+
+  Future<void> setReminderTime(int hour, int minute) async {
+    final p = await prefs;
+    await p.setInt(AppConstants.keyReminderHour, hour);
+    await p.setInt(AppConstants.keyReminderMinute, minute);
+  }
+
   // ─── Plan ──────────────────────────────────────────
   Future<String> getPlanType() async {
     final p = await prefs;

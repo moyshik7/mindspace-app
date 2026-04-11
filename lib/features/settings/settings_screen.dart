@@ -12,7 +12,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider);
-    final notificationsEnabled = ref.watch(settingsProvider);
+    final settings = ref.watch(settingsProvider);
+    final notificationsEnabled = settings.notificationsEnabled;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -118,7 +119,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
 
-            // Edit Profile button
+             // Edit Profile button
             SliverToBoxAdapter(
               child: StaggeredFadeSlide(
                 index: 1,
@@ -126,7 +127,7 @@ class SettingsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 4),
                   child: OutlinedButton(
-                    onPressed: () => _showComingSoon(context),
+                    onPressed: () => context.push('/settings/edit-profile'),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 44),
                     ),
@@ -141,9 +142,14 @@ class SettingsScreen extends ConsumerWidget {
             // Account section
             _buildSection(context, ref, 'Account', [
               _SettingsTile(
+                icon: Icons.visibility_outlined,
+                title: 'View Profile',
+                onTap: () => context.push('/settings/profile'),
+              ),
+              _SettingsTile(
                 icon: Icons.person_outline_rounded,
                 title: 'Edit Profile',
-                onTap: () => _showComingSoon(context),
+                onTap: () => context.push('/settings/edit-profile'),
               ),
               _SettingsTile(
                 icon: Icons.link_rounded,
@@ -235,7 +241,19 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.access_time_rounded,
                 title: 'Daily Reminder Time',
-                onTap: () => _showComingSoon(context),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${settings.reminderHour % 12 == 0 ? 12 : settings.reminderHour % 12}:${settings.reminderMinute.toString().padLeft(2, '0')} ${settings.reminderHour >= 12 ? 'PM' : 'AM'}',
+                      style: AppTypography.caption,
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.chevron_right_rounded,
+                        color: AppColors.textMuted, size: 20),
+                  ],
+                ),
+                onTap: () => _pickReminderTime(context, ref, settings),
               ),
               _SettingsTile(
                 icon: Icons.language_rounded,
@@ -418,6 +436,56 @@ class SettingsScreen extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Coming soon! Stay tuned 🚀')),
     );
+  }
+
+  Future<void> _pickReminderTime(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsState settings,
+  ) async {
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: settings.reminderHour,
+        minute: settings.reminderMinute,
+      ),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: AppColors.primary,
+              onPrimary: Colors.white,
+              surface: AppColors.surface,
+              onSurface: AppColors.textPrimary,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedTime != null) {
+      ref.read(settingsProvider.notifier).setReminderTime(
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Reminder time set to ${pickedTime.format(context)}',
+            ),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+    }
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {

@@ -11,6 +11,8 @@ class UserModel {
   final List<String> enrolledCourses;
   final Map<String, int> courseProgress; // courseId -> completed lesson count
   final Set<String> completedLessons; // "courseId_lessonIndex"
+  final String bio;
+  final String description;
   final DateTime createdAt;
 
   const UserModel({
@@ -24,6 +26,8 @@ class UserModel {
     this.enrolledCourses = const [],
     this.courseProgress = const {},
     this.completedLessons = const {},
+    this.bio = '',
+    this.description = '',
     required this.createdAt,
   });
 
@@ -38,6 +42,8 @@ class UserModel {
     List<String>? enrolledCourses,
     Map<String, int>? courseProgress,
     Set<String>? completedLessons,
+    String? bio,
+    String? description,
     DateTime? createdAt,
   }) {
     return UserModel(
@@ -51,6 +57,8 @@ class UserModel {
       enrolledCourses: enrolledCourses ?? this.enrolledCourses,
       courseProgress: courseProgress ?? this.courseProgress,
       completedLessons: completedLessons ?? this.completedLessons,
+      bio: bio ?? this.bio,
+      description: description ?? this.description,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -64,9 +72,9 @@ class UserModel {
       case PlanType.free:
         return 'Free';
       case PlanType.pro:
-        return 'Pro ⭐';
+        return 'Pro';
       case PlanType.ultra:
-        return 'Ultra 💎';
+        return 'Ultra';
     }
   }
 
@@ -113,6 +121,8 @@ class UserModel {
               ?.map((e) => e as String)
               .toSet() ??
           {},
+      bio: json['bio'] as String? ?? '',
+      description: json['description'] as String? ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
@@ -131,6 +141,8 @@ class UserModel {
       'enrolledCourses': enrolledCourses,
       'courseProgress': courseProgress,
       'completedLessons': completedLessons.toList(),
+      'bio': bio,
+      'description': description,
       'createdAt': createdAt.toIso8601String(),
     };
   }

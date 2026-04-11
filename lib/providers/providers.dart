@@ -154,13 +154,6 @@ class UserNotifier extends StateNotifier<UserModel> {
           if (snapshot.exists && snapshot.data() != null) {
             final user = UserModel.fromJson(snapshot.data()!);
             state = user;
-            
-            // Update photoUrl if it's null in Firestore but exists in Firebase
-            if (user.photoUrl == null && fbUser.photoURL != null) {
-              _firestore.collection('users').doc(fbUser.uid).update({
-                'photoUrl': fbUser.photoURL,
-              });
-            }
           } else {
             // Create user profile on first sign-in
             final newUser = UserModel(
@@ -195,6 +188,23 @@ class UserNotifier extends StateNotifier<UserModel> {
       _firestore.collection('users').doc(uid).update({'planType': plan.name});
     } else {
       state = state.copyWith(planType: plan);
+    }
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    required String bio,
+    required String description,
+  }) async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null) {
+      await _firestore.collection('users').doc(uid).update({
+        'name': name,
+        'bio': bio,
+        'description': description,
+      });
+    } else {
+      state = state.copyWith(name: name, bio: bio, description: description);
     }
   }
 
@@ -254,7 +264,8 @@ final userProvider = StateNotifierProvider<UserNotifier, UserModel>((ref) {
 
 // ─── Streak ──────────────────────────────────────────
 class StreakNotifier extends StateNotifier<int> {
-  StreakNotifier() : super(1);
+  final PreferencesRepository _prefs;
+  StreakNotifier(this._prefs) : super(1);
 
   Future<void> checkAndUpdateStreak() async {
     try {
@@ -278,13 +289,17 @@ class StreakNotifier extends StateNotifier<int> {
       if (lastDateOnly == null) {
         await docRef.update({'lastOpenDate': today.toIso8601String(), 'streakCount': 1});
         state = 1;
-        await NotificationService().scheduleStreakReminder();
+        final hour = await _prefs.getReminderHour();
+        final minute = await _prefs.getReminderMinute();
+        await NotificationService().scheduleStreakReminder(hour: hour, minute: minute);
         return;
       }
       
       if (lastDateOnly == todayStr) {
         state = streakCount;
-        await NotificationService().scheduleStreakReminder();
+        final hour = await _prefs.getReminderHour();
+        final minute = await _prefs.getReminderMinute();
+        await NotificationService().scheduleStreakReminder(hour: hour, minute: minute);
         return;
       }
       
@@ -298,7 +313,9 @@ class StreakNotifier extends StateNotifier<int> {
         state = 1;
       }
       
-      await NotificationService().scheduleStreakReminder();
+      final hour = await _prefs.getReminderHour();
+      final minute = await _prefs.getReminderMinute();
+      await NotificationService().scheduleStreakReminder(hour: hour, minute: minute);
     } catch (e) {
       debugPrint('Streak update error: $e');
       state = 1;
@@ -307,28 +324,85 @@ class StreakNotifier extends StateNotifier<int> {
 }
 
 final streakProvider = StateNotifierProvider<StreakNotifier, int>((ref) {
-  return StreakNotifier();
+  final prefs = ref.read(preferencesRepositoryProvider);
+  return StreakNotifier(prefs);
 });
 
-
 // ─── Settings ──────────────────────────────────────────
-class SettingsNotifier extends StateNotifier<bool> {
+class SettingsState {
+  final bool notificationsEnabled;
+  final int reminderHour;
+  final int reminderMinute;
+
+  SettingsState({
+    required this.notificationsEnabled,
+    required this.reminderHour,
+    required this.reminderMinute,
+  });
+
+  SettingsState copyWith({
+    bool? notificationsEnabled,
+    int? reminderHour,
+    int? reminderMinute,
+  }) {
+    return SettingsState(
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      reminderHour: reminderHour ?? this.reminderHour,
+      reminderMinute: reminderMinute ?? this.reminderMinute,
+    );
+  }
+}
+
+class SettingsNotifier extends StateNotifier<SettingsState> {
   final PreferencesRepository _prefs;
 
-  SettingsNotifier(this._prefs) : super(true);
+  SettingsNotifier(this._prefs)
+      : super(SettingsState(
+          notificationsEnabled: true,
+          reminderHour: 18,
+          reminderMinute: 0,
+        ));
 
   Future<void> loadNotificationSetting() async {
-    state = await _prefs.getNotificationsEnabled();
+    final enabled = await _prefs.getNotificationsEnabled();
+    final hour = await _prefs.getReminderHour();
+    final minute = await _prefs.getReminderMinute();
+    state = SettingsState(
+      notificationsEnabled: enabled,
+      reminderHour: hour,
+      reminderMinute: minute,
+    );
   }
 
   Future<void> toggleNotifications(bool value) async {
-    state = value;
+    state = state.copyWith(notificationsEnabled: value);
     await _prefs.setNotificationsEnabled(value);
+  }
+
+  Future<void> setReminderTime(int hour, int minute) async {
+    state = state.copyWith(reminderHour: hour, reminderMinute: minute);
+    await _prefs.setReminderTime(hour, minute);
+    
+    // Reschedule reminder if enabled
+    if (state.notificationsEnabled) {
+      await NotificationService().scheduleStreakReminder(
+        hour: hour,
+        minute: minute,
+      );
+    }
   }
 }
 
 final settingsProvider =
-    StateNotifierProvider<SettingsNotifier, bool>((ref) {
+    StateNotifierProvider<SettingsNotifier, SettingsState>((ref) {
   final prefs = ref.read(preferencesRepositoryProvider);
   return SettingsNotifier(prefs);
+});
+
+final otherUserProvider = FutureProvider.family<UserModel?, String>((ref, uid) async {
+  final snapshot = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+  if (snapshot.exists && snapshot.data() != null) {
+    return UserModel.fromJson(snapshot.data()!);
+  }
+  return null;
 });

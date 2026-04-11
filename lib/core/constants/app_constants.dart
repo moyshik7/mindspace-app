@@ -54,4 +54,6 @@ class AppConstants {
   static const String keyUserEmail = 'user_email';
   static const String keyIsLoggedIn = 'is_logged_in';
   static const String keyPlanType = 'plan_type';
+  static const String keyReminderHour = 'reminder_hour';
+  static const String keyReminderMinute = 'reminder_minute';
 }

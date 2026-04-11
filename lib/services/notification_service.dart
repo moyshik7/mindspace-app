@@ -62,15 +62,15 @@ class NotificationService {
         ?.requestNotificationsPermission();
   }
 
-  Future<void> scheduleStreakReminder() async {
+  Future<void> scheduleStreakReminder({int hour = 18, int minute = 0}) async {
     // Cancel the existing reminder first
     await _notificationsPlugin.cancel(id: 0);
 
-    // Calculate time: 18:00 (6 PM) tomorrow
+    // Calculate time: tomorrow at user's chosen time
     final now = DateTime.now();
     // Streak breaks if not visited next day
     final tomorrow = now.add(const Duration(days: 1));
-    var scheduledDate = tz.TZDateTime.local(tomorrow.year, tomorrow.month, tomorrow.day, 18, 0);
+    var scheduledDate = tz.TZDateTime.local(tomorrow.year, tomorrow.month, tomorrow.day, hour, minute);
 
     // If the time is somehow in the past (e.g., timezone weirdness), don't schedule
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {

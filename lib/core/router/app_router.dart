@@ -11,6 +11,8 @@ import '../../features/community/community_screen.dart';
 import '../../features/community/write_post_screen.dart';
 import '../../features/mehrin/mehrin_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/settings/edit_profile_screen.dart';
+import '../../features/profile/profile_screen.dart';
 import '../../features/consultation/screens/counsellor_detail_screen.dart';
 import '../../features/settings/paywall_screen.dart';
 import '../../features/consultation/counsellors_screen.dart';
@@ -77,6 +79,18 @@ final GoRouter appRouter = GoRouter(
       pageBuilder: (context, state) => _SlideTransitionPage(
         key: state.pageKey,
         child: const LoginScreen(),
+      ),
+    ),
+
+    // Profile (Other users)
+    GoRoute(
+      path: '/profile/:uid',
+      parentNavigatorKey: _rootNavigatorKey,
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: ProfileScreen(
+          uid: state.pathParameters['uid'],
+        ),
       ),
     ),
 
@@ -220,6 +234,22 @@ final GoRouter appRouter = GoRouter(
             child: const SettingsScreen(),
           ),
           routes: [
+            GoRoute(
+              path: 'profile',
+              parentNavigatorKey: _rootNavigatorKey,
+              pageBuilder: (context, state) => _SlideTransitionPage(
+                key: state.pageKey,
+                child: const ProfileScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'edit-profile',
+              parentNavigatorKey: _rootNavigatorKey,
+              pageBuilder: (context, state) => _SlideTransitionPage(
+                key: state.pageKey,
+                child: const EditProfileScreen(),
+              ),
+            ),
             GoRoute(
               path: 'paywall',
               parentNavigatorKey: _rootNavigatorKey,

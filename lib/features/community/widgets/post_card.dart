@@ -5,6 +5,7 @@ import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/animated_button.dart';
 import '../../../data/models/post_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 class PostCard extends StatefulWidget {
   final PostModel post;
@@ -89,55 +90,68 @@ class _PostCardState extends State<PostCard>
           Row(
             children: [
               // Avatar
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: post.authorPhoto == null
-                      ? LinearGradient(
-                          colors: [
-                            flairColor.withValues(alpha: 0.6),
-                            flairColor.withValues(alpha: 0.3),
-                          ],
-                        )
-                      : null,
-                  image: post.authorPhoto != null
-                      ? DecorationImage(
-                          image: NetworkImage(post.authorPhoto!),
-                          fit: BoxFit.cover,
+              GestureDetector(
+                onTap: post.isAnonymous
+                    ? null
+                    : () => context.push('/profile/${post.authorUid}'),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: post.isAnonymous || post.authorPhoto == null
+                        ? LinearGradient(
+                            colors: [
+                              flairColor.withValues(alpha: 0.6),
+                              flairColor.withValues(alpha: 0.3),
+                            ],
+                          )
+                        : null,
+                    image: !post.isAnonymous && post.authorPhoto != null
+                        ? DecorationImage(
+                            image: NetworkImage(post.authorPhoto!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: post.isAnonymous || post.authorPhoto == null
+                      ? Center(
+                          child: Text(
+                            post.isAnonymous
+                                ? 'A'
+                                : (post.authorName.isNotEmpty
+                                    ? post.authorName[0].toUpperCase()
+                                    : '?'),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         )
                       : null,
                 ),
-                child: post.authorPhoto == null
-                    ? Center(
-                        child: Text(
-                          post.authorName.isNotEmpty
-                              ? post.authorName[0].toUpperCase()
-                              : '?',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      )
-                    : null,
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      post.authorName,
-                      style: AppTypography.bodyMedium.copyWith(fontSize: 13),
-                    ),
-                    Text(
-                      AppDateUtils.timeAgo(post.createdAt),
-                      style: AppTypography.caption
-                          .copyWith(fontSize: 11, color: AppColors.textMuted),
-                    ),
-                  ],
+                child: GestureDetector(
+                  onTap: post.isAnonymous
+                      ? null
+                      : () => context.push('/profile/${post.authorUid}'),
+                  behavior: HitTestBehavior.opaque,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        post.isAnonymous ? 'Anonymous' : post.authorName,
+                        style: AppTypography.bodyMedium.copyWith(fontSize: 13),
+                      ),
+                      Text(
+                        AppDateUtils.timeAgo(post.createdAt),
+                        style: AppTypography.caption
+                            .copyWith(fontSize: 11, color: AppColors.textMuted),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               // Flair badge
