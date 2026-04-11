@@ -8,6 +8,7 @@ import '../data/models/user_model.dart';
 import '../data/models/post_model.dart';
 import '../data/repositories/preferences_repository.dart';
 import '../core/utils/date_utils.dart';
+import '../services/notification_service.dart';
 
 // ─── Preferences Repository Provider ──────────────────────────────
 final preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
@@ -151,7 +152,15 @@ class UserNotifier extends StateNotifier<UserModel> {
             .snapshots()
             .listen((snapshot) {
           if (snapshot.exists && snapshot.data() != null) {
-            state = UserModel.fromJson(snapshot.data()!);
+            final user = UserModel.fromJson(snapshot.data()!);
+            state = user;
+            
+            // Update photoUrl if it's null in Firestore but exists in Firebase
+            if (user.photoUrl == null && fbUser.photoURL != null) {
+              _firestore.collection('users').doc(fbUser.uid).update({
+                'photoUrl': fbUser.photoURL,
+              });
+            }
           } else {
             // Create user profile on first sign-in
             final newUser = UserModel(
@@ -269,11 +278,13 @@ class StreakNotifier extends StateNotifier<int> {
       if (lastDateOnly == null) {
         await docRef.update({'lastOpenDate': today.toIso8601String(), 'streakCount': 1});
         state = 1;
+        await NotificationService().scheduleStreakReminder();
         return;
       }
       
       if (lastDateOnly == todayStr) {
         state = streakCount;
+        await NotificationService().scheduleStreakReminder();
         return;
       }
       
@@ -286,6 +297,8 @@ class StreakNotifier extends StateNotifier<int> {
         await docRef.update({'lastOpenDate': today.toIso8601String(), 'streakCount': 1});
         state = 1;
       }
+      
+      await NotificationService().scheduleStreakReminder();
     } catch (e) {
       debugPrint('Streak update error: $e');
       state = 1;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/notification_service.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/staggered_fade_slide.dart';
@@ -29,6 +30,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref.read(userProvider.notifier).loadUser();
       ref.read(streakProvider.notifier).checkAndUpdateStreak();
       ref.read(settingsProvider.notifier).loadNotificationSetting();
+      
+      // Request notification permissions
+      NotificationService().requestPermissions();
     });
   }
 
@@ -52,6 +56,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     index: 0,
                     child: ConsultationHeader(
                       userName: user.name,
+                      userPhoto: user.photoUrl,
                       onAvatarTap: () => context.go('/settings'),
                     ),
                   ),

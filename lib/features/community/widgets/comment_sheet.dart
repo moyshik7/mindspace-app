@@ -99,16 +99,28 @@ class _CommentSheetState extends ConsumerState<CommentSheet> {
                                   height: 32,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    color: AppColors.primary.withValues(alpha: 0.15),
+                                    color: comment.authorPhoto == null
+                                        ? AppColors.primary.withValues(alpha: 0.15)
+                                        : null,
+                                    image: comment.authorPhoto != null
+                                        ? DecorationImage(
+                                            image: NetworkImage(comment.authorPhoto!),
+                                            fit: BoxFit.cover,
+                                          )
+                                        : null,
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      comment.authorName[0].toUpperCase(),
-                                      style: AppTypography.captionBold.copyWith(
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
+                                  child: comment.authorPhoto == null
+                                      ? Center(
+                                          child: Text(
+                                            comment.authorName.isNotEmpty
+                                                ? comment.authorName[0].toUpperCase()
+                                                : '?',
+                                            style: AppTypography.captionBold.copyWith(
+                                              color: AppColors.primary,
+                                            ),
+                                          ),
+                                        )
+                                      : null,
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(

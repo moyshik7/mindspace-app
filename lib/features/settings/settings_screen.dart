@@ -50,7 +50,15 @@ class SettingsScreen extends ConsumerWidget {
                           height: 80,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: AppColors.primaryGradient,
+                            gradient: user.photoUrl == null
+                                ? AppColors.primaryGradient
+                                : null,
+                            image: user.photoUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(user.photoUrl!),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.primary.withValues(alpha: 0.25),
@@ -59,16 +67,18 @@ class SettingsScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: Text(
-                              user.name.isNotEmpty
-                                  ? user.name[0].toUpperCase()
-                                  : 'U',
-                              style: AppTypography.headingXL.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                          child: user.photoUrl == null
+                              ? Center(
+                                  child: Text(
+                                    user.name.isNotEmpty
+                                        ? user.name[0].toUpperCase()
+                                        : 'U',
+                                    style: AppTypography.headingXL.copyWith(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : null,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -133,11 +143,6 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.person_outline_rounded,
                 title: 'Edit Profile',
-                onTap: () => _showComingSoon(context),
-              ),
-              _SettingsTile(
-                icon: Icons.lock_outline_rounded,
-                title: 'Change Password',
                 onTap: () => _showComingSoon(context),
               ),
               _SettingsTile(
@@ -261,12 +266,12 @@ class SettingsScreen extends ConsumerWidget {
               _SettingsTile(
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy Policy',
-                onTap: () => _showComingSoon(context),
+                onTap: () => context.push('/settings/privacy'),
               ),
               _SettingsTile(
                 icon: Icons.description_outlined,
                 title: 'Terms of Service',
-                onTap: () => _showComingSoon(context),
+                onTap: () => context.push('/settings/tos'),
               ),
               _SettingsTile(
                 icon: Icons.star_outline_rounded,

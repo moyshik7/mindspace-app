@@ -13,6 +13,7 @@ class CounsellorModel {
   final List<String> expertise;
   final String training;
   final String shortBio;
+  final int price;
   final List<String> keywords;
 
   CounsellorModel({
@@ -28,6 +29,7 @@ class CounsellorModel {
     required this.expertise,
     required this.training,
     required this.shortBio,
+    required this.price,
     required this.keywords,
   });
 
@@ -45,6 +47,7 @@ class CounsellorModel {
       expertise: List<String>.from(json['expertise']),
       training: json['training'] as String,
       shortBio: json['shortBio'] as String,
+      price: json['price'] as int? ?? 1000,
       keywords: List<String>.from(json['keywords']),
     );
   }

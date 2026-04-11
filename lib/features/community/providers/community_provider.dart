@@ -140,6 +140,19 @@ class CommunityNotifier extends StateNotifier<CommunityState> {
     }
   }
 
+  Future<void> deletePost(String postId) async {
+    final previousPosts = List<PostModel>.from(state.posts);
+    state = state.copyWith(
+      posts: state.posts.where((p) => p.id != postId).toList(),
+    );
+
+    try {
+      await _repository.deletePost(postId);
+    } catch (e) {
+      state = state.copyWith(posts: previousPosts, error: e.toString());
+    }
+  }
+
   @override
   void dispose() {
     _postNewSub?.cancel();

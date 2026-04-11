@@ -14,6 +14,8 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/consultation/screens/counsellor_detail_screen.dart';
 import '../../features/settings/paywall_screen.dart';
 import '../../features/consultation/counsellors_screen.dart';
+import '../../features/settings/privacy_policy_screen.dart';
+import '../../features/settings/terms_of_service_screen.dart';
 import '../../data/models/counsellor_model.dart';
 import '../../shell/app_shell.dart';
 
@@ -224,6 +226,22 @@ final GoRouter appRouter = GoRouter(
               pageBuilder: (context, state) => _SlideTransitionPage(
                 key: state.pageKey,
                 child: const PaywallScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'privacy',
+              parentNavigatorKey: _rootNavigatorKey,
+              pageBuilder: (context, state) => _SlideTransitionPage(
+                key: state.pageKey,
+                child: const PrivacyPolicyScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'tos',
+              parentNavigatorKey: _rootNavigatorKey,
+              pageBuilder: (context, state) => _SlideTransitionPage(
+                key: state.pageKey,
+                child: const TermsOfServiceScreen(),
               ),
             ),
           ],

@@ -140,6 +140,9 @@ class _CommunityScreenState extends ConsumerState<CommunityScreen> {
                             onLikeTap: () {
                               ref.read(communityNotifierProvider.notifier).toggleLike(communityState.posts[index].id);
                             },
+                            onDeleteTap: () {
+                              ref.read(communityNotifierProvider.notifier).deletePost(communityState.posts[index].id);
+                            },
                             onCommentTap: () {
                               showModalBottomSheet(
                                 context: context,

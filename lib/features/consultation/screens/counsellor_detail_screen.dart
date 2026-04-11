@@ -11,7 +11,8 @@ class CounsellorDetailScreen extends StatelessWidget {
   const CounsellorDetailScreen({super.key, required this.counsellor});
 
   void _bookNow() async {
-    final url = Uri.parse('https://wa.me/+8801805527311');
+    final message = "[Booking] Counselor: ${counsellor.name}";
+    final url = Uri.parse('https://wa.me/+8801805527311?text=${Uri.encodeComponent(message)}');
     try {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (e) {
@@ -108,11 +109,11 @@ class CounsellorDetailScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const _StatPill(icon: Icons.star, text: '5.0', iconColor: Color(0xFFFFB300)),
+                   _StatPill(icon: Icons.history_edu_rounded, text: counsellor.experience, iconColor: const Color(0xFF07CDAB)),
                   const SizedBox(width: 12),
                   const _StatPill(icon: Icons.chat_bubble_outline, text: '500+ sessions', iconColor: Color(0xFF07CDAB)),
                   const SizedBox(width: 12),
-                  _StatPill(icon: Icons.access_time, text: counsellor.experience, iconColor: const Color(0xFF07CDAB)),
+                  _StatPill(icon: Icons.payments_outlined, text: '৳${counsellor.price}', iconColor: const Color(0xFF07CDAB)),
                 ],
               ),
 

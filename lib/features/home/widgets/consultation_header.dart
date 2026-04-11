@@ -5,8 +5,14 @@ import '../../../core/theme/app_typography.dart';
 
 class ConsultationHeader extends StatelessWidget {
   final String userName;
+  final String? userPhoto;
   final VoidCallback onAvatarTap;
-  const ConsultationHeader({super.key, required this.userName, required this.onAvatarTap});
+  const ConsultationHeader({
+    super.key,
+    required this.userName,
+    this.userPhoto,
+    required this.onAvatarTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +48,13 @@ class ConsultationHeader extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: onAvatarTap,
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     radius: 20,
                     backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, color: Colors.white),
+                    backgroundImage: userPhoto != null ? NetworkImage(userPhoto!) : null,
+                    child: userPhoto == null
+                        ? const Icon(Icons.person, color: Colors.white)
+                        : null,
                   ),
                 ),
               ],

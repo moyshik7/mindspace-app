@@ -136,10 +136,10 @@ class _GridCounsellorCard extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Text('5.0', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 4),
-                        Icon(Icons.star, color: Color(0xFFFFB300), size: 10),
+                      children: [
+                        Text(counsellor.experience, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.history_edu_rounded, color: Color(0xFF07CDAB), size: 10),
                       ],
                     ),
                   ),
@@ -154,13 +154,18 @@ class _GridCounsellorCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 4),
             Text(
               counsellor.title,
               textAlign: TextAlign.center,
-              maxLines: 2,
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(color: Colors.white70, fontSize: 10),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '৳${counsellor.price}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Color(0xFF07CDAB), fontSize: 11, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
             Row(

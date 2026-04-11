@@ -4,12 +4,14 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/date_utils.dart';
 import '../../../core/widgets/animated_button.dart';
 import '../../../data/models/post_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostCard extends StatefulWidget {
   final PostModel post;
   final VoidCallback? onCommentTap;
   final VoidCallback? onMoreTap;
   final VoidCallback? onLikeTap;
+  final VoidCallback? onDeleteTap;
 
   const PostCard({
     super.key,
@@ -17,6 +19,7 @@ class PostCard extends StatefulWidget {
     this.onCommentTap,
     this.onMoreTap,
     this.onLikeTap,
+    this.onDeleteTap,
   });
 
   @override
@@ -91,22 +94,34 @@ class _PostCardState extends State<PostCard>
                 height: 36,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      flairColor.withValues(alpha: 0.6),
-                      flairColor.withValues(alpha: 0.3),
-                    ],
-                  ),
+                  gradient: post.authorPhoto == null
+                      ? LinearGradient(
+                          colors: [
+                            flairColor.withValues(alpha: 0.6),
+                            flairColor.withValues(alpha: 0.3),
+                          ],
+                        )
+                      : null,
+                  image: post.authorPhoto != null
+                      ? DecorationImage(
+                          image: NetworkImage(post.authorPhoto!),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                child: Center(
-                  child: Text(
-                    post.authorName[0].toUpperCase(),
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
+                child: post.authorPhoto == null
+                    ? Center(
+                        child: Text(
+                          post.authorName.isNotEmpty
+                              ? post.authorName[0].toUpperCase()
+                              : '?',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -143,6 +158,37 @@ class _PostCardState extends State<PostCard>
                 ),
               ),
               const SizedBox(width: 4),
+              // Delete button for author
+              if (FirebaseAuth.instance.currentUser?.uid == post.authorUid)
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Delete Post'),
+                        content: const Text('Are you sure you want to delete this post?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              widget.onDeleteTap?.call();
+                            },
+                            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.all(4),
+                    child: Icon(Icons.delete_outline_rounded,
+                        color: AppColors.error, size: 20),
+                  ),
+                ),
               // More button
               GestureDetector(
                 onTap: widget.onMoreTap,
