@@ -297,29 +297,6 @@ final streakProvider = StateNotifierProvider<StreakNotifier, int>((ref) {
   return StreakNotifier();
 });
 
-// ─── Community (Likes) ──────────────────────────────────────────
-class CommunityNotifier extends StateNotifier<List<PostModel>> {
-  CommunityNotifier() : super([]);
-
-  void toggleLike(String postId) {
-    state = [
-      for (final post in state)
-        if (post.id == postId)
-          PostModel(
-            id: post.id,
-            username: post.username,
-            flair: post.flair,
-            text: post.text,
-            likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-            comments: post.comments,
-            createdAt: post.createdAt,
-            isLiked: !post.isLiked,
-          )
-        else
-          post,
-    ];
-  }
-}
 
 // ─── Settings ──────────────────────────────────────────
 class SettingsNotifier extends StateNotifier<bool> {

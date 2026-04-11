@@ -1,26 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../data/models/post_model.dart';
+import '../../data/repositories/post_repository.dart';
 
-class WritePostScreen extends StatefulWidget {
+class WritePostScreen extends ConsumerStatefulWidget {
   const WritePostScreen({super.key});
 
   @override
-  State<WritePostScreen> createState() => _WritePostScreenState();
+  ConsumerState<WritePostScreen> createState() => _WritePostScreenState();
 }
 
-class _WritePostScreenState extends State<WritePostScreen> {
+class _WritePostScreenState extends ConsumerState<WritePostScreen> {
   final _textController = TextEditingController();
   PostFlair _selectedFlair = PostFlair.other;
   bool _isAnonymous = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _textController.dispose();
     super.dispose();
+  }
+
+  Future<void> _publish() async {
+    if (_textController.text.trim().isEmpty || _isLoading) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await ref.read(postRepositoryProvider).createPost(
+        content: _textController.text.trim(),
+        flair: _selectedFlair.label,
+        isAnonymous: _isAnonymous,
+      );
+
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Post published successfully 🚀'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -98,8 +135,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                     children: PostFlair.values.map((flair) {
                       final isSelected = flair == _selectedFlair;
                       return GestureDetector(
-                        onTap: () =>
-                            setState(() => _selectedFlair = flair),
+                        onTap: () => setState(() => _selectedFlair = flair),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(
@@ -154,8 +190,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                         ),
                         Switch(
                           value: _isAnonymous,
-                          onChanged: (v) =>
-                              setState(() => _isAnonymous = v),
+                          onChanged: (v) => setState(() => _isAnonymous = v),
                         ),
                       ],
                     ),
@@ -181,21 +216,16 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 ),
               ),
             ),
-            child: GradientButton(
-              text: 'Publish',
-              onTap: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                        'Community posts will be live in the next update 🚀'),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : GradientButton(
+                    text: 'Publish',
+                    onTap: _publish,
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
     );
   }
 }
+

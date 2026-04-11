@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'models/course_model.dart';
-import 'models/post_model.dart';
-import 'models/comment_model.dart';
 import 'models/guide_model.dart';
 import 'models/tip_model.dart';
 
@@ -770,100 +768,4 @@ The key isn't to eliminate negative thoughts — that's impossible. The key is t
     ),
   ];
 
-  // ─── COMMUNITY POSTS ──────────────────────────────────────────
-  static List<PostModel> posts = [
-    PostModel(
-      id: 'post_1',
-      username: 'anonstar92',
-      flair: PostFlair.anxiety,
-      text: 'Does anyone else feel anxious for no reason in the morning? Like I wake up and my heart is already racing. Is this normal? Would love some advice.',
-      likes: 47,
-      comments: 12,
-      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-    ),
-    PostModel(
-      id: 'post_2',
-      username: 'mindful_mira',
-      flair: PostFlair.gratitude,
-      text: 'Today I took a 20-minute walk without my phone. It was the most peaceful I\'ve felt in weeks. Highly recommend disconnecting even for a little while. 🌿',
-      likes: 134,
-      comments: 28,
-      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-    ),
-    PostModel(
-      id: 'post_3',
-      username: 'quietstorm_bd',
-      flair: PostFlair.venting,
-      text: 'I\'ve been masking my emotions for so long that I don\'t even know how I actually feel anymore. Anyone relate to this? How did you start reconnecting with yourself?',
-      likes: 89,
-      comments: 41,
-      createdAt: DateTime.now().subtract(const Duration(hours: 8)),
-    ),
-    PostModel(
-      id: 'post_4',
-      username: 'growthseeker',
-      flair: PostFlair.personalGrowth,
-      text: 'Started journaling 3 weeks ago. I can already see patterns in my thinking I never noticed before. It\'s like having a conversation with yourself you never knew you needed.',
-      likes: 212,
-      comments: 55,
-      createdAt: DateTime.now().subtract(const Duration(hours: 12)),
-    ),
-    PostModel(
-      id: 'post_5',
-      username: 'zeynep_w',
-      flair: PostFlair.adviceNeeded,
-      text: 'My therapist suggested EMDR therapy for my trauma. Has anyone tried it? I\'m nervous and would love to hear personal experiences before my first session.',
-      likes: 31,
-      comments: 19,
-      createdAt: DateTime.now().subtract(const Duration(hours: 18)),
-    ),
-    PostModel(
-      id: 'post_6',
-      username: 'rknight99',
-      flair: PostFlair.anxiety,
-      text: 'Reminder that you don\'t have to have everything figured out. Uncertainty is uncomfortable but it\'s also where growth lives. You\'re doing better than you think. 💙',
-      likes: 387,
-      comments: 67,
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-  ];
-
-  // ─── SAMPLE COMMENTS ──────────────────────────────────────────
-  static List<CommentModel> sampleComments = [
-    CommentModel(
-      id: 'c1',
-      username: 'calm_mind_23',
-      text: 'Yes! I experience this too. My therapist says it\'s cortisol surging. Try box breathing right when you wake up — it helps me a lot.',
-      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      likes: 14,
-    ),
-    CommentModel(
-      id: 'c2',
-      username: 'hopeful_heart',
-      text: 'Morning anxiety is so real. I started keeping a glass of water by my bed and drinking it immediately. Small thing but it helps ground me.',
-      createdAt: DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
-      likes: 8,
-    ),
-    CommentModel(
-      id: 'c3',
-      username: 'sunflower_mel',
-      text: 'You\'re not alone in this. The fact that you\'re asking means you\'re already taking steps 💛',
-      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-      likes: 22,
-    ),
-    CommentModel(
-      id: 'c4',
-      username: 'the_introvert',
-      text: 'I\'ve been dealing with this for years. What helped me was not checking my phone for the first 30 minutes. The difference is noticeable.',
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-      likes: 11,
-    ),
-    CommentModel(
-      id: 'c5',
-      username: 'wellness_warrior',
-      text: 'This is very common. Try naming 3 things you can see as soon as you open your eyes. It interrupts the anxiety cycle.',
-      createdAt: DateTime.now().subtract(const Duration(hours: 4)),
-      likes: 6,
-    ),
-  ];
 }

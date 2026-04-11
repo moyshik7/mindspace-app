@@ -100,7 +100,7 @@ class _PostCardState extends State<PostCard>
                 ),
                 child: Center(
                   child: Text(
-                    post.username[0].toUpperCase(),
+                    post.authorName[0].toUpperCase(),
                     style: AppTypography.bodyMedium.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -114,7 +114,7 @@ class _PostCardState extends State<PostCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.username,
+                      post.authorName,
                       style: AppTypography.bodyMedium.copyWith(fontSize: 13),
                     ),
                     Text(
@@ -158,7 +158,7 @@ class _PostCardState extends State<PostCard>
 
           // Post text
           Text(
-            post.text,
+            post.content,
             style: AppTypography.body.copyWith(
               height: 1.6,
               color: AppColors.textPrimary.withValues(alpha: 0.9),
@@ -192,7 +192,7 @@ class _PostCardState extends State<PostCard>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '${post.likes}',
+                      '${post.likeCount}',
                       style: AppTypography.caption.copyWith(
                         color: post.isLiked
                             ? AppColors.error
@@ -214,7 +214,8 @@ class _PostCardState extends State<PostCard>
                         size: 18, color: AppColors.textMuted),
                     const SizedBox(width: 4),
                     Text(
-                      '${post.comments}',
+                      '${post.commentCount}',
+
                       style: AppTypography.caption.copyWith(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
