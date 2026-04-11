@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1029800972751:android:0e72e32f2a1b5ac24482ba",
+        "mobilesdk_app_id": "1:1029800972751:android:aa44e74a347837754482ba",
         "android_client_info": {
-          "package_name": "com.example.mindspace"
+          "package_name": "com.mindspacebd.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1029800972751-dnqculdsmu4n9i906oomjuvq01vtolpc.apps.googleusercontent.com",
+          "client_id": "1029800972751-sirqh0drh0braokvlnivlpupbvmesa8u.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.mindspace",
+            "package_name": "com.mindspacebd.app",
             "certificate_hash": "9e4d8f339d0f4dacedd81d55ac2ae4ff401210d2"
           }
         },

@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyA8CMfrIrObX27RyDIXC53VpmGVLcmQwWg',
-    appId: '1:1029800972751:android:0e72e32f2a1b5ac24482ba',
+    appId: '1:1029800972751:android:aa44e74a347837754482ba',
     messagingSenderId: '1029800972751',
     projectId: 'mindspace-app-aac14',
     storageBucket: 'mindspace-app-aac14.firebasestorage.app',
@@ -66,11 +66,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyA6HqrdtFZ-t97al_jcfhVXJiXYMZOkyDQ',
-    appId: '1:1029800972751:ios:a2611acd124a828e4482ba',
+    appId: '1:1029800972751:ios:434b92dbcbd1c31a4482ba',
     messagingSenderId: '1029800972751',
     projectId: 'mindspace-app-aac14',
     storageBucket: 'mindspace-app-aac14.firebasestorage.app',
-    iosClientId: '1029800972751-gdeqgch0int769s0bi9e1hv1slm1fqle.apps.googleusercontent.com',
-    iosBundleId: 'com.example.mindspace',
+    androidClientId: '1029800972751-dnqculdsmu4n9i906oomjuvq01vtolpc.apps.googleusercontent.com',
+    iosClientId: '1029800972751-nhq0clslk3llbjfqidhl3ob35rkls6bt.apps.googleusercontent.com',
+    iosBundleId: 'com.mindspacebd.app',
   );
+
 }
