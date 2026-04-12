@@ -282,6 +282,11 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => _showComingSoon(context),
               ),
               _SettingsTile(
+                icon: Icons.feedback_outlined,
+                title: 'Send Feedback',
+                onTap: () => context.push('/settings/feedback'),
+              ),
+              _SettingsTile(
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy Policy',
                 onTap: () => context.push('/settings/privacy'),
@@ -300,7 +305,7 @@ class SettingsScreen extends ConsumerWidget {
                 icon: Icons.info_outline_rounded,
                 title: 'App Version',
                 trailing: Text(
-                  'v1.0.0 (Build 1)',
+                  'v1.1.7 (Build 1)',
                   style: AppTypography.caption,
                 ),
               ),

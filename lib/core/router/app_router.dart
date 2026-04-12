@@ -18,6 +18,7 @@ import '../../features/settings/paywall_screen.dart';
 import '../../features/consultation/counsellors_screen.dart';
 import '../../features/settings/privacy_policy_screen.dart';
 import '../../features/settings/terms_of_service_screen.dart';
+import '../../features/settings/feedback_screen.dart';
 import '../../data/models/counsellor_model.dart';
 import '../../shell/app_shell.dart';
 
@@ -272,6 +273,14 @@ final GoRouter appRouter = GoRouter(
               pageBuilder: (context, state) => _SlideTransitionPage(
                 key: state.pageKey,
                 child: const TermsOfServiceScreen(),
+              ),
+            ),
+            GoRoute(
+              path: 'feedback',
+              parentNavigatorKey: _rootNavigatorKey,
+              pageBuilder: (context, state) => _SlideTransitionPage(
+                key: state.pageKey,
+                child: const FeedbackScreen(),
               ),
             ),
           ],
