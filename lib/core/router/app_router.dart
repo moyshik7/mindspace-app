@@ -10,6 +10,7 @@ import '../../features/home/lesson_player_screen.dart';
 import '../../features/community/community_screen.dart';
 import '../../features/community/write_post_screen.dart';
 import '../../features/mehrin/mehrin_screen.dart';
+import '../../features/resources/resources_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/settings/edit_profile_screen.dart';
 import '../../features/profile/profile_screen.dart';
@@ -83,10 +84,10 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
 
-    // Profile (Other users)
+    // --- FULL SCREEN OVERLAY ROUTES (Root level) ---
+    
     GoRoute(
       path: '/profile/:uid',
-      parentNavigatorKey: _rootNavigatorKey,
       pageBuilder: (context, state) => _SlideTransitionPage(
         key: state.pageKey,
         child: ProfileScreen(
@@ -95,7 +96,118 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
 
-    // Main app with shell (bottom nav)
+    GoRoute(
+      path: '/home/counsellors',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const CounsellorsScreen(),
+      ),
+      routes: [
+        GoRoute(
+          path: ':id',
+          pageBuilder: (context, state) {
+            final counsellor = state.extra as CounsellorModel;
+            return _SlideTransitionPage(
+              key: state.pageKey,
+              child: CounsellorDetailScreen(counsellor: counsellor),
+            );
+          },
+        ),
+      ],
+    ),
+
+    GoRoute(
+      path: '/community/write-post',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const WritePostScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/settings/profile',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const ProfileScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/settings/edit-profile',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const EditProfileScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/settings/paywall',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const PaywallScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/settings/privacy',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const PrivacyPolicyScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/settings/tos',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const TermsOfServiceScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/settings/feedback',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const FeedbackScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/home/guide/:id',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: GuideDetailScreen(
+          guideId: state.pathParameters['id']!,
+        ),
+      ),
+    ),
+    
+    GoRoute(
+      path: '/home/course/:id',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: CourseDetailScreen(
+          courseId: state.pathParameters['id']!,
+        ),
+      ),
+      routes: [
+        GoRoute(
+          path: 'lesson/:lessonIndex',
+          pageBuilder: (context, state) => _SlideTransitionPage(
+            key: state.pageKey,
+            child: LessonPlayerScreen(
+              courseId: state.pathParameters['id']!,
+              lessonIndex: int.tryParse(
+                      state.pathParameters['lessonIndex']!) ??
+                  0,
+            ),
+          ),
+        ),
+      ],
+    ),
+
+    // --- MAIN SHELL (Bottom Nav) ---
+
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {
@@ -106,8 +218,10 @@ final GoRouter appRouter = GoRouter(
           index = 1;
         } else if (location.startsWith('/mehrin')) {
           index = 2;
-        } else if (location.startsWith('/settings')) {
+        } else if (location.startsWith('/resources')) {
           index = 3;
+        } else if (location.startsWith('/settings')) {
+          index = 4;
         }
 
         return AppShell(
@@ -124,6 +238,9 @@ final GoRouter appRouter = GoRouter(
                 context.go('/mehrin');
                 break;
               case 3:
+                context.go('/resources');
+                break;
+              case 4:
                 context.go('/settings');
                 break;
             }
@@ -132,93 +249,25 @@ final GoRouter appRouter = GoRouter(
         );
       },
       routes: [
-        // Home tab
+        // Home tab root
         GoRoute(
           path: '/home',
           pageBuilder: (context, state) => _SlideTransitionPage(
             key: state.pageKey,
             child: const HomeScreen(),
           ),
-          routes: [
-            GoRoute(
-              path: 'counsellors',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const CounsellorsScreen(),
-              ),
-              routes: [
-                GoRoute(
-                  path: ':id',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  pageBuilder: (context, state) {
-                    final counsellor = state.extra as CounsellorModel;
-                    return _SlideTransitionPage(
-                      key: state.pageKey,
-                      child: CounsellorDetailScreen(counsellor: counsellor),
-                    );
-                  },
-                ),
-              ],
-            ),
-            GoRoute(
-              path: 'guide/:id',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: GuideDetailScreen(
-                  guideId: state.pathParameters['id']!,
-                ),
-              ),
-            ),
-            GoRoute(
-              path: 'course/:id',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: CourseDetailScreen(
-                  courseId: state.pathParameters['id']!,
-                ),
-              ),
-              routes: [
-                GoRoute(
-                  path: 'lesson/:lessonIndex',
-                  parentNavigatorKey: _rootNavigatorKey,
-                  pageBuilder: (context, state) => _SlideTransitionPage(
-                    key: state.pageKey,
-                    child: LessonPlayerScreen(
-                      courseId: state.pathParameters['id']!,
-                      lessonIndex: int.tryParse(
-                              state.pathParameters['lessonIndex']!) ??
-                          0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
         ),
 
-        // Community tab
+        // Community tab root
         GoRoute(
           path: '/community',
           pageBuilder: (context, state) => _SlideTransitionPage(
             key: state.pageKey,
             child: const CommunityScreen(),
           ),
-          routes: [
-            GoRoute(
-              path: 'write-post',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const WritePostScreen(),
-              ),
-            ),
-          ],
         ),
 
-        // Mehrin AI tab
+        // Mehrin AI tab root
         GoRoute(
           path: '/mehrin',
           pageBuilder: (context, state) => _SlideTransitionPage(
@@ -227,63 +276,22 @@ final GoRouter appRouter = GoRouter(
           ),
         ),
 
-        // Settings tab
+        // Resources tab root
+        GoRoute(
+          path: '/resources',
+          pageBuilder: (context, state) => _SlideTransitionPage(
+            key: state.pageKey,
+            child: const ResourcesScreen(),
+          ),
+        ),
+
+        // Settings tab root
         GoRoute(
           path: '/settings',
           pageBuilder: (context, state) => _SlideTransitionPage(
             key: state.pageKey,
             child: const SettingsScreen(),
           ),
-          routes: [
-            GoRoute(
-              path: 'profile',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const ProfileScreen(),
-              ),
-            ),
-            GoRoute(
-              path: 'edit-profile',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const EditProfileScreen(),
-              ),
-            ),
-            GoRoute(
-              path: 'paywall',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const PaywallScreen(),
-              ),
-            ),
-            GoRoute(
-              path: 'privacy',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const PrivacyPolicyScreen(),
-              ),
-            ),
-            GoRoute(
-              path: 'tos',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const TermsOfServiceScreen(),
-              ),
-            ),
-            GoRoute(
-              path: 'feedback',
-              parentNavigatorKey: _rootNavigatorKey,
-              pageBuilder: (context, state) => _SlideTransitionPage(
-                key: state.pageKey,
-                child: const FeedbackScreen(),
-              ),
-            ),
-          ],
         ),
       ],
     ),

@@ -12,7 +12,6 @@ import 'widgets/streak_card.dart';
 import 'widgets/plan_banner.dart';
 import 'widgets/daily_tip_card.dart';
 import 'widgets/quick_guides_section.dart';
-import 'widgets/courses_section.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -96,13 +95,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   StaggeredFadeSlide(
                     index: 4,
                     child: QuickGuidesSection(guides: DummyData.guides),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Courses
-                  StaggeredFadeSlide(
-                    index: 5,
-                    child: CoursesSection(courses: DummyData.courses),
                   ),
                   const SizedBox(height: 100),
                 ],

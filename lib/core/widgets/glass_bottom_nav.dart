@@ -18,6 +18,7 @@ class GlassBottomNav extends StatelessWidget {
     _NavItem(icon: Icons.home_rounded, label: 'Home'),
     _NavItem(icon: Icons.people_rounded, label: 'Community'),
     _NavItem(icon: Icons.auto_awesome_rounded, label: 'Mehrin AI'),
+    _NavItem(icon: Icons.grid_view_rounded, label: 'Resources'),
     _NavItem(icon: Icons.person_rounded, label: 'Settings'),
   ];
 
