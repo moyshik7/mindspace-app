@@ -71,7 +71,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   // Streak Card
                   StaggeredFadeSlide(
                     index: 1,
-                    child: StreakCard(streakCount: streak),
+                    child: StreakCard(streakCount: user.streakCount),
                   ),
                   const SizedBox(height: 4),
 
