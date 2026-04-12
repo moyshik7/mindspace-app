@@ -5,6 +5,7 @@ import '../../core/widgets/staggered_fade_slide.dart';
 import '../../data/dummy_data.dart';
 import '../home/widgets/quick_guides_section.dart';
 import '../home/widgets/courses_section.dart';
+import 'widgets/articles_section.dart';
 
 class ResourcesScreen extends StatelessWidget {
   const ResourcesScreen({super.key});
@@ -38,9 +39,16 @@ class ResourcesScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
+                  // Articles
+                  const StaggeredFadeSlide(
+                    index: 1,
+                    child: ArticlesSection(),
+                  ),
+                  const SizedBox(height: 24),
+
                   // Courses
                   StaggeredFadeSlide(
-                    index: 1,
+                    index: 2,
                     child: CoursesSection(courses: DummyData.courses),
                   ),
                   const SizedBox(height: 100),

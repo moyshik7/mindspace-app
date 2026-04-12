@@ -9,341 +9,360 @@ import '../../data/models/course_model.dart';
 import '../../data/models/user_model.dart';
 import '../../providers/providers.dart';
 
-class CourseDetailScreen extends ConsumerWidget {
+class CourseDetailScreen extends ConsumerStatefulWidget {
   final String courseId;
 
   const CourseDetailScreen({super.key, required this.courseId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CourseDetailScreen> createState() => _CourseDetailScreenState();
+}
+
+class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final course = DummyData.courses.firstWhere(
-      (c) => c.id == courseId,
+      (c) => c.id == widget.courseId,
       orElse: () => DummyData.courses.first,
     );
     final user = ref.watch(userProvider);
     final isEnrolled = user.enrolledCourses.contains(course.id);
+    final progress = user.getCourseProgress(widget.courseId);
+    final progressPercent = (progress / course.lessonCount).clamp(0.0, 1.0);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          // Hero Header
-          SliverAppBar(
-            expandedHeight: 220,
-            pinned: true,
-            backgroundColor: AppColors.background,
-            leading: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.background.withValues(alpha: 0.7),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back_rounded, size: 20),
-              ),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      course.gradientColors[0].withValues(alpha: 0.3),
-                      course.gradientColors[1].withValues(alpha: 0.1),
-                      AppColors.background,
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  ),
-                ),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      Hero(
-                        tag: 'course_${course.id}',
-                        child: Text(
-                          course.emoji,
-                          style: const TextStyle(fontSize: 72),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        course.title,
-                        style: AppTypography.headingL,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'by ${course.instructor}',
-                        style: AppTypography.caption,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          // Course info badges
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: const Color(0xFF0F1113),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _infoBadge(Icons.menu_book_rounded,
-                      '${course.lessonCount} Lessons'),
-                  const SizedBox(width: 12),
-                  _infoBadge(
-                      Icons.signal_cellular_alt_rounded, course.difficulty),
-                  const SizedBox(width: 12),
-                  _infoBadge(Icons.timer_rounded, course.duration),
-                ],
-              ),
-            ),
-          ),
-
-          // Description
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                course.description,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.7,
-                ),
-              ),
-            ),
-          ),
-
-          // Progress if enrolled
-          if (isEnrolled)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => context.pop(),
+                        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                      ),
+                      const Spacer(),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Your Progress', style: AppTypography.bodyMedium),
                         Text(
-                          '${user.getCourseProgress(courseId)}/${course.lessonCount}',
-                          style: AppTypography.captionBold.copyWith(
-                            color: AppColors.primary,
+                          course.title,
+                          style: AppTypography.headingL.copyWith(
+                            color: Colors.white,
+                            fontSize: 26,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          '${course.lessonCount} Lessons • ${course.instructor}',
+                          style: AppTypography.caption.copyWith(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: user.getCourseProgress(courseId) /
-                            course.lessonCount,
-                        minHeight: 6,
-                        backgroundColor: AppColors.surfaceBorder,
-                        valueColor: const AlwaysStoppedAnimation(
-                            AppColors.primary),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-          // Lessons header
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Lessons', style: AppTypography.headingM),
+            // TabBar
+            TabBar(
+              controller: _tabController,
+              indicatorColor: const Color(0xFFD8335B),
+              indicatorWeight: 3,
+              labelColor: const Color(0xFFD8335B),
+              unselectedLabelColor: Colors.white.withValues(alpha: 0.4),
+              labelStyle: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+              dividerColor: Colors.white.withValues(alpha: 0.05),
+              tabs: const [
+                Tab(text: 'Lessons'),
+                Tab(text: 'Description'),
+                Tab(text: 'Achievement'),
+              ],
             ),
-          ),
 
-          // Lesson list
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index >= course.lessons.length) return null;
-                final lesson = course.lessons[index];
-                final isCompleted =
-                    ref.read(userProvider.notifier).isLessonCompleted(
-                          courseId,
-                          index,
-                        );
-                final isLocked = user.planType == PlanType.free && index >= 3;
+            // Tab Content
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Lessons Tab
+                  _buildLessonsTab(context, ref, course, user, isEnrolled),
+                  // Description Tab
+                  _buildDescriptionTab(course),
+                  // Achievement Tab
+                  _buildAchievementTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: !isEnrolled
+          ? Container(
+              padding: EdgeInsets.fromLTRB(
+                20,
+                16,
+                20,
+                16 + MediaQuery.of(context).padding.bottom,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F1113),
+                border: Border(
+                  top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+                ),
+              ),
+              child: GradientButton(
+                text: 'Enroll Now',
+                onTap: () {
+                  ref.read(userProvider.notifier).enrollCourse(widget.courseId);
+                },
+              ),
+            )
+          : null,
+    );
+  }
 
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  child: InkWell(
-                    onTap: isLocked
-                        ? () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Upgrade to Pro to unlock all lessons 🔒'),
-                              ),
-                            );
-                          }
-                        : () {
-                            if (!isEnrolled) {
-                              ref
-                                  .read(userProvider.notifier)
-                                  .enrollCourse(courseId);
-                            }
-                            context.push(
-                              '/home/course/$courseId/lesson/$index',
-                            );
-                          },
-                    borderRadius: BorderRadius.circular(14),
-                    child: Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(14),
-                        border:
-                            Border.all(color: AppColors.surfaceBorder),
+  Widget _buildLessonsTab(
+    BuildContext context,
+    WidgetRef ref,
+    CourseModel course,
+    UserModel user,
+    bool isEnrolled,
+  ) {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+      itemCount: course.lessons.length,
+      itemBuilder: (context, index) {
+        final lesson = course.lessons[index];
+        final isCompleted = ref.read(userProvider.notifier).isLessonCompleted(
+              widget.courseId,
+              index,
+            );
+        final isLocked = user.planType == PlanType.free && index >= 3;
+        final lessonNumber = (index + 1).toString().padLeft(2, '0');
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: InkWell(
+            onTap: isLocked
+                ? () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Upgrade to Pro to unlock all lessons 🔒'),
                       ),
-                      child: Row(
-                        children: [
-                          // Lesson number circle
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isCompleted
-                                  ? AppColors.primary
-                                  : Colors.transparent,
-                              border: Border.all(
-                                color: isCompleted
-                                    ? AppColors.primary
-                                    : isLocked
-                                        ? AppColors.textMuted
-                                        : AppColors.surfaceBorder,
-                                width: 2,
+                    );
+                  }
+                : () {
+                    if (!isEnrolled) {
+                      ref.read(userProvider.notifier).enrollCourse(widget.courseId);
+                    }
+                    context.push('/home/course/${widget.courseId}/lesson/$index');
+                  },
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1D21),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        lessonNumber,
+                        style: AppTypography.headingM.copyWith(
+                          color: const Color(0xFFD8335B),
+                          fontSize: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              lesson.title,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: isLocked ? Colors.white.withValues(alpha: 0.4) : Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
                               ),
                             ),
-                            child: Center(
-                              child: isCompleted
-                                  ? const Icon(Icons.check_rounded,
-                                      size: 18, color: Colors.white)
-                                  : isLocked
-                                      ? const Icon(Icons.lock_rounded,
-                                          size: 14,
-                                          color: AppColors.textMuted)
-                                      : Text(
-                                          '${index + 1}',
-                                          style:
-                                              AppTypography.captionBold,
-                                        ),
+                            const SizedBox(height: 4),
+                            Text(
+                              isLocked ? 'Locked' : lesson.duration,
+                              style: AppTypography.caption.copyWith(
+                                color: Colors.white.withValues(alpha: 0.4),
+                              ),
                             ),
+                          ],
+                        ),
+                      ),
+                      if (!isLocked)
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFD8335B),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  lesson.title,
-                                  style: AppTypography.bodyMedium.copyWith(
-                                    color: isLocked
-                                        ? AppColors.textMuted
-                                        : AppColors.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  lesson.duration,
-                                  style: AppTypography.caption.copyWith(
-                                    color: AppColors.textMuted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            isLocked
-                                ? Icons.lock_outline_rounded
-                                : Icons.chevron_right_rounded,
-                            color: AppColors.textMuted,
+                          child: const Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white,
                             size: 20,
                           ),
-                        ],
-                      ),
-                    ),
+                        )
+                      else
+                        const Icon(Icons.lock_rounded, color: Colors.white24, size: 20),
+                    ],
                   ),
-                );
-              },
-              childCount: course.lessons.length,
+                  if (isEnrolled && !isLocked && isCompleted) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: const LinearProgressIndicator(
+                              value: 1.0,
+                              minHeight: 4,
+                              backgroundColor: Colors.white10,
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF67E88F)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          '100%',
+                          style: TextStyle(color: Color(0xFF67E88F), fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
+        );
+      },
+    );
+  }
 
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+  Widget _buildDescriptionTab(CourseModel course) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'What will I learn:',
+            style: AppTypography.headingM.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            course.description,
+            style: AppTypography.body.copyWith(
+              color: Colors.white.withValues(alpha: 0.7),
+              height: 1.6,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 24),
+          // Additional sections to match mockup
+          _learnItem('Foundations', 'Master the core concepts and fundamental principles of ${course.title}.'),
+          _learnItem('Practical Application', 'Learn how to apply your knowledge in real-world scenarios and projects.'),
+          _learnItem('Expert Techniques', 'Discover advanced tips and tricks used by industry professionals.'),
         ],
-      ),
-
-      // Bottom CTA
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          12,
-          20,
-          12 + MediaQuery.of(context).padding.bottom,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          border: Border(
-            top: BorderSide(
-              color: AppColors.surfaceBorder.withValues(alpha: 0.5),
-            ),
-          ),
-        ),
-        child: GradientButton(
-          text: isEnrolled ? 'Continue Learning' : 'Start Course',
-          onTap: () {
-            if (!isEnrolled) {
-              ref.read(userProvider.notifier).enrollCourse(courseId);
-            }
-            // Navigate to the first incomplete lesson
-            final nextLesson = _findNextLesson(ref, course);
-            context.push('/home/course/$courseId/lesson/$nextLesson');
-          },
-        ),
       ),
     );
   }
 
-  int _findNextLesson(WidgetRef ref, CourseModel course) {
-    for (int i = 0; i < course.lessons.length; i++) {
-      if (!ref.read(userProvider.notifier).isLessonCompleted(courseId, i)) {
-        return i;
-      }
-    }
-    return 0;
+  Widget _learnItem(String title, String desc) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: AppTypography.bodyMedium.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            desc,
+            style: AppTypography.body.copyWith(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget _infoBadge(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.surfaceBorder, width: 0.5),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildAchievementTab() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 14, color: AppColors.textMuted),
-          const SizedBox(width: 6),
-          Text(text, style: AppTypography.caption),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.emoji_events_rounded,
+              size: 64,
+              color: Colors.white.withValues(alpha: 0.1),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Achievements',
+            style: AppTypography.headingM.copyWith(color: Colors.white),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming soon',
+            style: AppTypography.body.copyWith(
+              color: Colors.white.withValues(alpha: 0.3),
+            ),
+          ),
         ],
       ),
     );

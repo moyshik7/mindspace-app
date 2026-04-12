@@ -21,6 +21,8 @@ import '../../features/settings/privacy_policy_screen.dart';
 import '../../features/settings/terms_of_service_screen.dart';
 import '../../features/settings/feedback_screen.dart';
 import '../../data/models/counsellor_model.dart';
+import '../../features/resources/all_articles_screen.dart';
+import '../../features/resources/article_detail_screen.dart';
 import '../../shell/app_shell.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -204,6 +206,24 @@ final GoRouter appRouter = GoRouter(
           ),
         ),
       ],
+    ),
+
+    GoRoute(
+      path: '/articles',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: const AllArticlesScreen(),
+      ),
+    ),
+
+    GoRoute(
+      path: '/article/:slug',
+      pageBuilder: (context, state) => _SlideTransitionPage(
+        key: state.pageKey,
+        child: ArticleDetailScreen(
+          slug: state.pathParameters['slug']!,
+        ),
+      ),
     ),
 
     // --- MAIN SHELL (Bottom Nav) ---
