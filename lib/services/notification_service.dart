@@ -96,7 +96,7 @@ class NotificationService {
       body: message,
       scheduledDate: scheduledDate,
       notificationDetails: platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
   }
 }
