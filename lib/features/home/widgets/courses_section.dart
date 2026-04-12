@@ -49,118 +49,90 @@ class CoursesSection extends ConsumerWidget {
             final isEnrolled = user.enrolledCourses.contains(course.id);
             final progress = user.getCourseProgress(course.id);
             final progressPercent =
-                isEnrolled ? progress / course.lessonCount : 0.0;
+                isEnrolled ? (progress / course.lessonCount).clamp(0.0, 1.0) : 0.0;
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: AnimatedButton(
-                onTap: () => context.push('/home/course/${course.id}'),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        course.gradientColors[0].withValues(alpha: 0.12),
-                        course.gradientColors[1].withValues(alpha: 0.04),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1D21),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppColors.surfaceBorder),
-                    boxShadow: AppColors.subtleGlow,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(course.emoji,
-                              style: const TextStyle(fontSize: 36)),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  course.title,
-                                  style: AppTypography.headingM
-                                      .copyWith(fontSize: 16),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'by ${course.instructor}',
-                                  style: AppTypography.caption,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      course.title,
+                      style: AppTypography.headingM.copyWith(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
                       ),
-                      const SizedBox(height: 14),
-                      // Badges
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _badge('${course.lessonCount} Lessons',
-                              Icons.menu_book_rounded),
-                          _badge(
-                              course.difficulty, Icons.signal_cellular_alt_rounded),
-                          _badge(course.duration, Icons.timer_rounded),
-                        ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Lesson ${isEnrolled ? progress : 0}/${course.lessonCount}',
+                      style: AppTypography.caption.copyWith(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontSize: 14,
                       ),
-                      if (isEnrolled) ...[
-                        const SizedBox(height: 14),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: LinearProgressIndicator(
-                                  value: progressPercent,
-                                  minHeight: 5,
-                                  backgroundColor: AppColors.surfaceBorder,
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                    AppColors.primary,
-                                  ),
-                                ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: progressPercent,
+                              minHeight: 8,
+                              backgroundColor: Colors.white.withValues(alpha: 0.05),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Color(0xFF67E88F),
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              '${(progressPercent * 100).round()}%',
-                              style: AppTypography.captionBold.copyWith(
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 40,
-                          child: GradientButton(
-                            text: 'Continue',
-                            height: 40,
-                            onTap: () =>
-                                context.push('/home/course/${course.id}'),
                           ),
                         ),
-                      ] else ...[
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 40,
-                          child: GradientButton(
-                            text: 'Start Course',
-                            height: 40,
-                            onTap: () =>
-                                context.push('/home/course/${course.id}'),
+                        const SizedBox(width: 16),
+                        Text(
+                          '${(progressPercent * 100).round()}%',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: Colors.white,
+                            fontSize: 14,
                           ),
                         ),
                       ],
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: () => context.push('/home/course/${course.id}'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD8335B),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(27),
+                          ),
+                          elevation: 0,
+                          textStyle: AppTypography.button.copyWith(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        child: Text(isEnrolled ? 'Continue Course' : 'Start Course'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
