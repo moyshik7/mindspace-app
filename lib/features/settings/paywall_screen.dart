@@ -69,7 +69,7 @@ class PaywallScreen extends ConsumerWidget {
               context,
               ref,
               title: 'Pro',
-              price: '399 BDT',
+              price: '299 BDT',
               period: '/month',
               features: [
                 _Feature('50 messages/day with Mehrin AI', true),
@@ -92,7 +92,7 @@ class PaywallScreen extends ConsumerWidget {
               context,
               ref,
               title: 'Ultra',
-              price: '799 BDT',
+              price: '499 BDT',
               period: '/month',
               features: [
                 _Feature('100 messages/day with Mehrin AI', true),

@@ -64,7 +64,7 @@ class PlanBanner extends StatelessWidget {
             children: [
               Expanded(
                 child: GradientButton(
-                  text: 'Try Pro — \$4.99/mo',
+                  text: 'Try Pro — 299 BDT/mo',
                   onTap: onUpgrade,
                   height: 44,
                 ),
