@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://api.bmchacks.app/api/v1';
+  static const String baseUrl = 'https://api.mindspacebd.com/api/v1';
 
   static Future<Map<String, String>> _getHeaders({bool requireAuth = false}) async {
     final headers = {'Content-Type': 'application/json'};

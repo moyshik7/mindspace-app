@@ -28,7 +28,7 @@ class SocketService {
     final token = await FirebaseAuth.instance.currentUser?.getIdToken();
 
     socket = io.io(
-      'https://api.bmchacks.app',
+      'https://api.mindspacebd.com',
       io.OptionBuilder()
           .setTransports(['websocket'])
           .setAuth({'token': token})
